@@ -58,9 +58,9 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("Clinical Parameters")
-    Compressiontime = st.number_input("Compression Time (minutes)", 30.0, 1200.0, 120.0, step=5.0)
-    IntraopNTG = st.number_input("Intraoperative Nitroglycerin Dose (μg)", 0.0, 2500.0, 200.0, step=50.0)
-    PreRaddiam = st.number_input("Pre-procedural Radial Artery Diameter (mm)", 0.5, 7.0, 2.5, step=0.1)
+    Compressiontime = st.number_input("Compression Time (minutes)", 30.0, 400.0, 120.0, step=5.0)
+    IntraopNTG = st.number_input("Intraoperative Nitroglycerin Dose (μg)", 0.0, 900.0, 200.0, step=50.0)
+    PreRaddiam = st.number_input("Pre-procedural Radial Artery Diameter (mm)", 0.5, 3.8, 2.5, step=0.1)
     SRratio = st.number_input("Sheath-to-Artery Ratio", 0.1, 2.0, 0.6, step=0.05)
 
 with col2:
@@ -122,6 +122,16 @@ if st.button("🔄 Reset"):
 
 st.markdown("---")
 st.markdown("*This tool uses machine learning for prediction. Results are for reference only and should not replace clinical judgment.*")
+
+
+
+
+
+
+
+
+
+
 
 
 
