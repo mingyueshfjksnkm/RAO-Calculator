@@ -1,4 +1,3 @@
-# app.py — Streamlit 版 RAO 风险预测计算器
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,7 +5,7 @@ import pickle
 import os
 
 # ======================================================
-# ✅ 必须放在最前的 Streamlit 页面设置
+# ✅ Streamlit 页面设置
 # ======================================================
 st.set_page_config(
     page_title="RAO Risk Calculator",
@@ -99,16 +98,19 @@ with col2:
     Heparincategory = st.radio(
         "Heparin Category",
         options=["1", "2"],
+        index=0,
         format_func=lambda x: "≤5000 IU" if x == "1" else "≥5000 IU"
     )
     Punctureattempts = st.radio(
         "Puncture Attempts",
         options=["1", "2"],
+        index=0,
         format_func=lambda x: "Single Puncture" if x == "1" else "Multiple Punctures"
     )
     Priorradpunctures = st.radio(
         "History of Prior Radial Artery Catheterization",
         options=["0", "1"],
+        index=0,
         format_func=lambda x: "No" if x == "0" else "Yes"
     )
 
@@ -118,6 +120,10 @@ with col2:
 def predict_risk(Compressiontime, IntraopNTG, PreRaddiam, SRratio,
                  Heparincategory, Punctureattempts, Priorradpunctures):
     try:
+        # 输入验证
+        if any(v is None for v in [Compressiontime, IntraopNTG, PreRaddiam, SRratio]):
+            return "❌ Please fill in all required numerical parameters"
+        
         df = pd.DataFrame([{
             "Compressiontime": Compressiontime,
             "Intraoperativenitroglycerindose": IntraopNTG,
@@ -158,13 +164,14 @@ def predict_risk(Compressiontime, IntraopNTG, PreRaddiam, SRratio,
 # 按钮区
 # ======================================================
 if st.button("🚀 Calculate RAO Risk"):
-    st.markdown(predict_risk(
+    result = predict_risk(
         Compressiontime, IntraopNTG, PreRaddiam, SRratio,
         Heparincategory, Punctureattempts, Priorradpunctures
-    ))
+    )
+    st.markdown(result)
 
 if st.button("🔄 Reset"):
-    st.experimental_rerun()
+    st.rerun()
 
 # ======================================================
 # 页脚
@@ -174,6 +181,7 @@ st.markdown("""
 *This tool uses machine learning for prediction.  
 Results are for reference only and should not replace clinical judgment.*
 """)
+
 
 
 
