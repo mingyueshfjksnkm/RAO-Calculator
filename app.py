@@ -1,6 +1,7 @@
 import sys
 import types
 sys.modules["pyaudioop"] = types.ModuleType("pyaudioop")
+
 import gradio as gr
 import pandas as pd
 import numpy as np
@@ -32,7 +33,7 @@ def predict_risk(Compressiontime, IntraopNTG, PreRaddiam, SRratio,
         df = pd.DataFrame([{
             "Compressiontime": float(Compressiontime),
             "Intraoperativenitroglycerindose": float(IntraopNTG),
-            "PreRaddiam": float(PreRaddiam)/10,  # Convert to cm
+            "PreRaddiam": float(PreRaddiam) / 10,  # Convert mm to cm
             "SRratio": float(SRratio),
             "Heparincategory": int(Heparincategory),
             "Punctureattempts": int(Punctureattempts),
@@ -71,7 +72,7 @@ def predict_risk(Compressiontime, IntraopNTG, PreRaddiam, SRratio,
         result = f"""
 {color} **Prediction Result: {risk_level}**
 
-**Radial Artery Occlusion Probability:** {prob * 100:.2f}%
+**Radial Artery Occlusion Probability:** {prob * 100:.2f}%  
 
 **Clinical Recommendation:** {suggestion}
 
@@ -86,145 +87,52 @@ def predict_risk(Compressiontime, IntraopNTG, PreRaddiam, SRratio,
 def reset_inputs():
     return [120, 200, 2.5, 0.6, "1", "1", "0"]
 
-# Create interface
+# === Gradio Interface ===
 with gr.Blocks(theme=gr.themes.Soft(), title="RAO Risk Calculator") as demo:
     gr.Markdown("""
     # 🌡 Radial Artery Occlusion (RAO) Risk Calculator
-    
     *Machine learning-based prediction of radial artery occlusion risk following transradial procedures*
     """)
-    
+
     with gr.Row():
         with gr.Column():
             gr.Markdown("### Clinical Parameters")
-            compression_time = gr.Number(
-                label="Compression Time (minutes)",
-                value=120,
-                minimum=30,
-                maximum=400,
-                step=5,
-                info="Typically 30-400 minutes"
-            )
-            intraop_ntg = gr.Number(
-                label="Intraoperative Nitroglycerin Dose (μg)",
-                value=200,
-                minimum=0,
-                maximum=900,
-                step=50,
-                info="Common dose: 0-900μg"
-            )
-            pre_rad_diam = gr.Number(
-                label="Pre-procedural Radial Artery Diameter (mm)",
-                value=2.5,
-                minimum=0.5,
-                maximum=3.8,
-                step=0.1,
-                info="Ultrasound measurement"
-            )
-            sr_ratio = gr.Number(
-                label="Sheath-to-Artery Ratio",
-                value=0.6,
-                minimum=0.1,
-                maximum=1.5,
-                step=0.05,
-                info="Sheath outer diameter / artery diameter"
-            )
+            compression_time = gr.Number(label="Compression Time (minutes)", value=120, minimum=30, maximum=400, step=5)
+            intraop_ntg = gr.Number(label="Intraoperative Nitroglycerin Dose (μg)", value=200, minimum=0, maximum=900, step=50)
+            pre_rad_diam = gr.Number(label="Pre-procedural Radial Artery Diameter (mm)", value=2.5, minimum=0.5, maximum=3.8, step=0.1)
+            sr_ratio = gr.Number(label="Sheath-to-Artery Ratio", value=0.6, minimum=0.1, maximum=1.5, step=0.05)
             
         with gr.Column():
             gr.Markdown("### Categorical Variables")
-            heparin_category = gr.Radio(
-                choices=[("≤5000 IU", "1"), ("≥5000 IU", "2")],
-                label="Heparin Category",
-                value="1",
-                info="Anticoagulation dosage"
-            )
-            puncture_attempts = gr.Radio(
-                choices=[("Single Puncture", "1"), ("Multiple Punctures", "2")],
-                label="Puncture Attempts",
-                value="1",
-                info="Number of attempts before success"
-            )
-            prior_rad_punctures = gr.Radio(
-                choices=[("No", "0"), ("Yes", "1")],
-                label="History of Prior Radial Artery Catheterization",
-                value="0",
-                info="Previous ipsilateral radial procedures"
-            )
-            
+            heparin_category = gr.Radio(choices=[("≤5000 IU", "1"), ("≥5000 IU", "2")], label="Heparin Category", value="1")
+            puncture_attempts = gr.Radio(choices=[("Single Puncture", "1"), ("Multiple Punctures", "2")], label="Puncture Attempts", value="1")
+            prior_rad_punctures = gr.Radio(choices=[("No", "0"), ("Yes", "1")], label="Prior Radial Catheterization", value="0")
+
             with gr.Row():
-                predict_btn = gr.Button("🚀 Calculate RAO Risk", variant="primary", size="lg")
+                predict_btn = gr.Button("🚀 Calculate RAO Risk", variant="primary")
                 reset_btn = gr.Button("🔄 Reset", variant="secondary")
     
-    with gr.Row():
-        output_text = gr.Markdown(
-            label="Prediction Result",
-            value="Enter parameters and click calculate..."
-        )
-    
-    # Examples section
-    with gr.Accordion("📋 Example Inputs", open=False):
-        gr.Markdown("""
-        **Example 1 - Low Risk Case:**
-        - Compression Time: 120 minutes
-        - Nitroglycerin: 200μg  
-        - Radial Diameter: 2.5mm
-        - Sheath-to-Artery Ratio: 0.6
-        - Heparin: ≤5000 IU
-        - Puncture: Single
-        - No Prior History
-        
-        **Example 2 - High Risk Case:**
-        - Compression Time: 180 minutes
-        - Nitroglycerin: 100μg
-        - Radial Diameter: 2.0mm  
-        - Sheath-to-Artery Ratio: 0.8
-        - Heparin: ≤5000 IU
-        - Puncture: Multiple
-        - Prior History Present
-        """)
-        
-        examples = gr.Examples(
-            examples=[
-                [120, 200, 2.5, 0.6, "1", "1", "0"],
-                [180, 100, 2.0, 0.8, "1", "2", "1"],
-                [90, 300, 3.0, 0.5, "2", "1", "0"]
-            ],
-            inputs=[
-                compression_time, intraop_ntg, pre_rad_diam, sr_ratio,
-                heparin_category, puncture_attempts, prior_rad_punctures
-            ],
-            label="Quick Fill Examples"
-        )
-    
-    # Event handlers
-    predict_btn.click(
-        fn=predict_risk,
-        inputs=[
-            compression_time, intraop_ntg, pre_rad_diam, sr_ratio,
-            heparin_category, puncture_attempts, prior_rad_punctures
-        ],
-        outputs=output_text
-    )
-    
-    reset_btn.click(
-        fn=reset_inputs,
-        outputs=[
-            compression_time, intraop_ntg, pre_rad_diam, sr_ratio,
-            heparin_category, puncture_attempts, prior_rad_punctures
-        ]
-    )
+    output_text = gr.Markdown(label="Prediction Result", value="Enter parameters and click calculate...")
 
-    # Footer
+    predict_btn.click(fn=predict_risk, 
+                      inputs=[compression_time, intraop_ntg, pre_rad_diam, sr_ratio,
+                              heparin_category, puncture_attempts, prior_rad_punctures],
+                      outputs=output_text)
+
+    reset_btn.click(fn=reset_inputs,
+                    outputs=[compression_time, intraop_ntg, pre_rad_diam, sr_ratio,
+                             heparin_category, puncture_attempts, prior_rad_punctures])
+
     gr.Markdown("""
     ---
     *This tool uses machine learning for prediction. Results are for reference only and should not replace clinical judgment.*
     """)
 
 if __name__ == "__main__":
-    demo.launch(
-        server_name="0.0.0.0" if os.getenv('SPACE_ID') else "127.0.0.1",
-        share=False
-    )
+    port = int(os.environ.get("PORT", 10000))  # ✅ Render uses PORT environment variable
+    demo.launch(server_name="0.0.0.0", server_port=port, share=False)
+
+
 
 
 
