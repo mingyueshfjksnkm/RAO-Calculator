@@ -227,24 +227,7 @@ if __name__ == "__main__":
 
 
 
-predict_risk(
-    Compressiontime = 800,
-    IntraopNTG = 800,
-    PreRaddiam = 4.0,  # mm
-    SRratio = 0.5,
-    Heparincategory = "1",
-    Punctureattempts = "1",
-    Priorradpunctures = "0"
-)
-predict_risk(
-    Compressiontime = 800,
-    IntraopNTG = 0,
-    PreRaddiam = 4.0,  # mm
-    SRratio = 0.5,
-    Heparincategory = "1",
-    Punctureattempts = "1",
-    Priorradpunctures = "0"
-)
+
 
 
 
